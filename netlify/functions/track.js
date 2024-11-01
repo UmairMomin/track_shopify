@@ -62,7 +62,7 @@ exports.handler = async (event) => {
           "Access-Control-Allow-Origin": "https://realitees.in",
           "Access-Control-Allow-Headers": "Content-Type",
         },
-        body: JSON.stringify({ error: "Order not found." }),
+        body: JSON.stringify({ message: "Order not found." }),
       };
     }
   } catch (error) {
