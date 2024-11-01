@@ -46,15 +46,25 @@ exports.handler = async (event) => {
 
     if (matchingOrder) {
       const trackingUrl = matchingOrder.fulfillments[0]?.tracking_url;
-
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "https://realitees.in",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-        body: JSON.stringify({ message: "Order found", trackingUrl }),
-      };
+      if (trackingUrl) {
+        return {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin": "https://realitees.in",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+          body: JSON.stringify({ message: "Order found", trackingUrl }),
+        };
+      } else {
+        return {
+          statusCode: 404,
+          headers: {
+            "Access-Control-Allow-Origin": "https://realitees.in",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+          body: JSON.stringify({ message: "Tracking not found" }),
+        };
+      }
     } else {
       return {
         statusCode: 404,
