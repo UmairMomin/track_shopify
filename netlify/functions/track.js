@@ -1,5 +1,3 @@
-// netlify/functions/fetchOrder.js or track.js
-
 require("dotenv").config();
 const axios = require("axios");
 
@@ -7,13 +5,26 @@ const SHOPIFY_API_URL = process.env.SHOPIFY_API_URL;
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 
 exports.handler = async (event) => {
-  const { orderNumber } = JSON.parse(event.body);
+  // Handle preflight requests
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "https://realitees.in",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+      },
+      body: "",
+    };
+  }
 
+  // Process POST request
+  const { orderNumber } = JSON.parse(event.body);
   if (!orderNumber) {
     return {
       statusCode: 400,
       headers: {
-        "Access-Control-Allow-Origin": "https://realitees.in", // Allow only your domain
+        "Access-Control-Allow-Origin": "https://realitees.in",
         "Access-Control-Allow-Headers": "Content-Type",
       },
       body: JSON.stringify({ error: "Order number is required." }),
@@ -36,32 +47,19 @@ exports.handler = async (event) => {
     if (matchingOrder) {
       const trackingUrl = matchingOrder.fulfillments[0]?.tracking_url;
 
-      if (trackingUrl) {
-        return {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin": "https://realitees.in", // Allow only your domain
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
-          body: JSON.stringify({ message: "Order found", trackingUrl }),
-        };
-      } else {
-        return {
-          statusCode: 404,
-          headers: {
-            "Access-Control-Allow-Origin": "https://realitees.in", // Allow only your domain
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
-          body: JSON.stringify({
-            error: "No tracking information available for this order.",
-          }),
-        };
-      }
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "https://realitees.in",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+        body: JSON.stringify({ message: "Order found", trackingUrl }),
+      };
     } else {
       return {
         statusCode: 404,
         headers: {
-          "Access-Control-Allow-Origin": "https://realitees.in", // Allow only your domain
+          "Access-Control-Allow-Origin": "https://realitees.in",
           "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify({ error: "Order not found." }),
@@ -72,7 +70,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers: {
-        "Access-Control-Allow-Origin": "https://realitees.in", // Allow only your domain
+        "Access-Control-Allow-Origin": "https://realitees.in",
         "Access-Control-Allow-Headers": "Content-Type",
       },
       body: JSON.stringify({
