@@ -33,7 +33,16 @@ exports.handler = async (event) => {
 
   try {
     let allOrders = [];
-    let url = `${SHOPIFY_API_URL}.json?status=any&limit=50`;
+
+    // Calculate date range for the last month
+    const today = new Date();
+    const lastMonth = new Date();
+    lastMonth.setMonth(today.getMonth() - 1);
+
+    const createdAtMin = lastMonth.toISOString(); // Start date (1 month ago)
+    const createdAtMax = today.toISOString(); // End date (today)
+
+    let url = `${SHOPIFY_API_URL}.json?status=any&created_at_min=${createdAtMin}&created_at_max=${createdAtMax}&limit=50`;
 
     // Pagination logic
     while (url) {
