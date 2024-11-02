@@ -57,42 +57,49 @@ exports.handler = async (event) => {
       }
     }
 
-    // Find the order that matches the order_number
-    const matchingOrder = allOrders.find(
-      (order) => order.order_number == orderNumber
-    );
-
-    if (matchingOrder) {
-      const trackingUrl = matchingOrder.fulfillments[0]?.tracking_url;
-      if (trackingUrl) {
-        return {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin": "https://realitees.in",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
-          body: JSON.stringify({ message: "Order found", trackingUrl }),
-        };
-      } else {
-        return {
-          statusCode: 404,
-          headers: {
-            "Access-Control-Allow-Origin": "https://realitees.in",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
-          body: JSON.stringify({ message: "Tracking not found" }),
-        };
-      }
-    } else {
+    if (allOrders) {
       return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "https://realitees.in",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-        body: JSON.stringify({ message: "Order not found." }),
+        statusCode: 200,
+        body: JSON.stringify({ allOrders }),
       };
     }
+
+    // // Find the order that matches the order_number
+    // const matchingOrder = allOrders.find(
+    //   (order) => order.order_number == orderNumber
+    // );
+
+    // if (matchingOrder) {
+    //   const trackingUrl = matchingOrder.fulfillments[0]?.tracking_url;
+    //   if (trackingUrl) {
+    //     return {
+    //       statusCode: 200,
+    //       headers: {
+    //         "Access-Control-Allow-Origin": "https://realitees.in",
+    //         "Access-Control-Allow-Headers": "Content-Type",
+    //       },
+    //       body: JSON.stringify({ message: "Order found", trackingUrl }),
+    //     };
+    //   } else {
+    //     return {
+    //       statusCode: 404,
+    //       headers: {
+    //         "Access-Control-Allow-Origin": "https://realitees.in",
+    //         "Access-Control-Allow-Headers": "Content-Type",
+    //       },
+    //       body: JSON.stringify({ message: "Tracking not found" }),
+    //     };
+    //   }
+    // } else {
+    //   return {
+    //     statusCode: 404,
+    //     headers: {
+    //       "Access-Control-Allow-Origin": "https://realitees.in",
+    //       "Access-Control-Allow-Headers": "Content-Type",
+    //     },
+    //     body: JSON.stringify({ message: "Order not found." }),
+    //   };
+    // }
   } catch (error) {
     console.error("Error fetching orders:", error);
     return {
