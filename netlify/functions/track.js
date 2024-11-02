@@ -32,7 +32,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await axios.get(`${SHOPIFY_API_URL}.json`, {
+    const response = await axios.get(`${SHOPIFY_API_URL}.json?status=any`, {
       headers: {
         "X-Shopify-Access-Token": ACCESS_TOKEN,
         "Content-Type": "application/json",
