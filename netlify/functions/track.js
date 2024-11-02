@@ -42,6 +42,7 @@ exports.handler = async (event) => {
           "X-Shopify-Access-Token": ACCESS_TOKEN,
           "Content-Type": "application/json",
         },
+        timeout: 10000,
       });
 
       const orders = response.data.orders;
