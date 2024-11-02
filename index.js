@@ -22,21 +22,43 @@ app.post("/api/track-order", async (req, res) => {
   }
 
   try {
-    // Fetch all orders (consider limiting this in a production scenario)
-    const response = await axios.get(`${SHOPIFY_API_URL}.json`, {
-      headers: {
-        "X-Shopify-Access-Token": ACCESS_TOKEN,
-        "Content-Type": "application/json",
-      },
-    });
+    // Calculate date range for the last month
+    const today = new Date();
+    const lastMonth = new Date();
+    lastMonth.setMonth(today.getMonth() - 1);
 
-    const orders = response.data.orders; // Get the orders from the response
+    const createdAtMin = lastMonth.toISOString(); // Start date (1 month ago)
+    const createdAtMax = today.toISOString(); // End date (today)
+
+    let allOrders = [];
+    let url = `${SHOPIFY_API_URL}.json?status=any&created_at_min=${createdAtMin}&created_at_max=${createdAtMax}&limit=50`;
+
+    // Pagination logic
+    while (url) {
+      const response = await axios.get(url, {
+        headers: {
+          "X-Shopify-Access-Token": ACCESS_TOKEN,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const orders = response.data.orders; // Get the orders from the response
+      allOrders = allOrders.concat(orders); // Add the current page orders to the allOrders array
+
+      // Check for pagination in response headers
+      const linkHeader = response.headers.link;
+      if (linkHeader && linkHeader.includes('rel="next"')) {
+        const nextUrlMatch = linkHeader.match(/<([^>]+)>; rel="next"/);
+        url = nextUrlMatch ? nextUrlMatch[1] : null; // Get the next page URL
+      } else {
+        url = null; // No more pages
+      }
+    }
 
     // Find the order that matches the order_number
-    const matchingOrder = orders.find(
+    const matchingOrder = allOrders.find(
       (order) => order.order_number == orderNumber
-    ); // Match with order_number
-    console.log(matchingOrder);
+    );
 
     if (matchingOrder) {
       // Construct the tracking URL if fulfillments exist

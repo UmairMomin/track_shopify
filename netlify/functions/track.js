@@ -32,15 +32,33 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await axios.get(`${SHOPIFY_API_URL}.json?status=any`, {
-      headers: {
-        "X-Shopify-Access-Token": ACCESS_TOKEN,
-        "Content-Type": "application/json",
-      },
-    });
+    let allOrders = [];
+    let url = `${SHOPIFY_API_URL}.json?status=any&limit=50`;
 
-    const orders = response.data.orders;
-    const matchingOrder = orders.find(
+    // Pagination logic
+    while (url) {
+      const response = await axios.get(url, {
+        headers: {
+          "X-Shopify-Access-Token": ACCESS_TOKEN,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const orders = response.data.orders;
+      allOrders = allOrders.concat(orders); // Add current page orders to the allOrders array
+
+      // Check for pagination in response headers
+      const linkHeader = response.headers.link;
+      if (linkHeader && linkHeader.includes('rel="next"')) {
+        const nextUrlMatch = linkHeader.match(/<([^>]+)>; rel="next"/);
+        url = nextUrlMatch ? nextUrlMatch[1] : null; // Get the next page URL
+      } else {
+        url = null; // No more pages
+      }
+    }
+
+    // Find the order that matches the order_number
+    const matchingOrder = allOrders.find(
       (order) => order.order_number == orderNumber
     );
 
