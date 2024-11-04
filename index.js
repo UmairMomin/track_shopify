@@ -15,10 +15,18 @@ const SHOPIFY_API_URL = process.env.SHOPIFY_API_URL;
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 
 app.post("/api/track-order", async (req, res) => {
-  const orderNumber = req.body.orderNumber; // Expecting order number from the client
-
-  if (!orderNumber) {
-    return res.status(400).send("Order number is required.");
+  const { orderNumber, mobileNumber } = req.body;
+  if (!orderNumber && !mobileNumber) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "https://realitees.in",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+      body: JSON.stringify({
+        error: "Either order number or mobile number is required.",
+      }),
+    };
   }
 
   try {
@@ -57,11 +65,14 @@ app.post("/api/track-order", async (req, res) => {
 
     // Find the order that matches the order_number
     const matchingOrder = allOrders.find(
-      (order) => order.order_number == orderNumber
+      (order) =>
+        order.order_number == orderNumber ||
+        order.customer.default_address.phone == mobileNumber
     );
 
     if (matchingOrder) {
       // Construct the tracking URL if fulfillments exist
+      // return res.json({ matchingOrder });
       const trackingUrl = matchingOrder.fulfillments[0]?.tracking_url;
 
       if (trackingUrl) {

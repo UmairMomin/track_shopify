@@ -19,15 +19,17 @@ exports.handler = async (event) => {
   }
 
   // Process POST request
-  const { orderNumber } = JSON.parse(event.body);
-  if (!orderNumber) {
+  const { orderNumber, mobileNumber } = JSON.parse(event.body);
+  if (!orderNumber && !mobileNumber) {
     return {
       statusCode: 400,
       headers: {
         "Access-Control-Allow-Origin": "https://realitees.in",
         "Access-Control-Allow-Headers": "Content-Type",
       },
-      body: JSON.stringify({ error: "Order number is required." }),
+      body: JSON.stringify({
+        error: "Either order number or mobile number is required.",
+      }),
     };
   }
 
@@ -69,7 +71,9 @@ exports.handler = async (event) => {
 
     // Find the order that matches the order_number
     const matchingOrder = allOrders.find(
-      (order) => order.order_number == orderNumber
+      (order) =>
+        order.order_number == orderNumber ||
+        order.customer.default_address.phone == mobileNumber
     );
 
     if (matchingOrder) {
